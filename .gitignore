@@ -1,0 +1,20 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# --- Herramientas de profesor (NO se publican) ---
+# El alumno recibe SOLO el cuaderno y grader_ofuscado.txt.
+# Todo lo demas que quede en el repo lo vera al clonarlo en Colab.
+#profe/
+#U2_T3A.ipynb
+README.md
+# Bundle legible: es una copia del motor, se genera con tools/build.py.
+grader_local.py
+
+# Exportacion a texto plano para NotebookLM (tools/exportar_notebooklm.py).
+notebooklm/
+
+# --- Sistema ---
+.DS_Store
+Thumbs.db

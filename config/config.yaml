@@ -1,0 +1,74 @@
+# =====================================================================
+#  Configuración de la tarea U2_T3B — Métodos para raíces complejas:
+#  Müller (parábola) y Bairstow (factor cuadrático)
+# ---------------------------------------------------------------------
+#  Todo lo que se ajusta sin tocar código vive aquí: los pesos, las
+#  tolerancias y la URL del webhook. Los enunciados de los ejercicios están
+#  en profe/ejercicios/*.md, los bancos teóricos en config/preguntas.yaml y
+#  los textos de las preguntas en profe/evaluador/*.md (NUNCA en el .py).
+#
+#  Esta es la ENTREGA B de la Tarea 3 (la A es Horner y deflación, en su
+#  propio repositorio U2_T3A). Cada entrega tiene su pestaña en la hoja de
+#  cálculo y sus propios 2 intentos.
+# =====================================================================
+tarea:
+  # `id` es el nombre de la PESTAÑA de la hoja de cálculo (el Apps Script la
+  # crea sola la primera vez) y también la parte que fija la semilla del
+  # alumno. Si lo cambias, cambian los ejercicios de todos.
+  id: "U2_T3B"
+  nombre: "Unidad 2 - Tarea 3B: Müller y Bairstow (raíces complejas)"
+  materia: "Métodos Numéricos"
+
+ponderacion:
+  automatico: 0.70
+  manual: 0.30
+
+evaluacion:
+  tolerancia_simple: 1e-4          # respuestas numéricas (relativa)
+  tolerancia_funcion: 1e-4         # raíz de muller / raíces de bairstow
+  min_aprobacion: 0.90             # 90 % de los 100 puntos para poder enviar
+  max_intentos: 2                  # envíos permitidos (lo impone el Apps Script)
+  max_iter: 100                    # lo lee el motor
+  criterios_paro: [1e-6]           # tolerancia de los métodos iterativos
+  accion: "guardar"
+  # ⚠️ REEMPLAZAR por los valores reales al configurar el Apps Script de U2_T3B.
+  webhook_token: "43f6f220-fc6e-4972-a69e-a11b54a629ec"
+  apps_script_url: "https://script.google.com/macros/s/AKfycbzD5k2BVwJ6pHjBgbc3-f1pbV9zrX0AloZfPiCyHSrsRZ7Kfno6ZQOnqzEbTikVlO6lRQ/exec"
+
+# 7 preguntas = 100 puntos. El orden es el del cuaderno: primero las dos
+# teóricas (Müller y Bairstow), luego las dos de programación (muller y
+# bairstow) intercaladas con sus preguntas de la actividad a mano, y al final
+# la conclusión sobre numpy.roots.
+slots:
+  - id: 1
+    tipo: "teorica"
+    banco: "MULLER_INTRO"
+    peso: 10
+  - id: 2
+    tipo: "teorica"
+    banco: "BAIRSTOW_INTRO"
+    peso: 10
+  - id: 3
+    tipo: "funcion"
+    metodo: "MULLER"
+    ficha: "muller_funcion"
+    peso: 25
+  - id: 4
+    tipo: "ejercicio_num"
+    metodo: "MULLER"
+    ficha: "muller_x3"
+    peso: 10
+  - id: 5
+    tipo: "funcion"
+    metodo: "BAIRSTOW"
+    ficha: "bairstow_funcion"
+    peso: 25
+  - id: 6
+    tipo: "vector"
+    metodo: "BAIRSTOW"
+    ficha: "bairstow_correccion"
+    peso: 10
+  - id: 7
+    tipo: "teorica"
+    banco: "POLI_CONCL"
+    peso: 10

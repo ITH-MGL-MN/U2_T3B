@@ -1,0 +1,164 @@
+# =====================================================================
+#  Bancos teóricos (opción múltiple) — Tarea 3B
+# ---------------------------------------------------------------------
+#  `correcta` es el índice (0 = la primera opción listada) de la opción
+#  buena. El motor baraja las opciones y reetiqueta a) b) c) d), así que la
+#  letra que ve el alumno NO es la de este archivo.
+#  MULLER_INTRO   -> pregunta 1 (antes de programar muller)
+#  BAIRSTOW_INTRO -> pregunta 2 (antes de programar bairstow)
+#  POLI_CONCL     -> pregunta 7 (al final, comparación con numpy.roots)
+# =====================================================================
+MULLER_INTRO:
+  - id: "mint_01"
+    titulo: "Qué ajusta Müller en cada paso"
+    pregunta: >-
+      A diferencia de la secante (que traza una **recta** por dos puntos), el
+      método de Müller traza una **parábola** por **tres** puntos
+      $(x_0, x_1, x_2)$. **¿Qué hace con esa parábola?**
+    opciones:
+      - "a) Salta a la raíz de la parábola más cercana a $x_2$ y usa ese punto como la nueva aproximación"
+      - "b) Usa el vértice de la parábola como la raíz"
+      - "c) Calcula la integral de la parábola entre $x_0$ y $x_2$"
+      - "d) Ajusta una recta tangente en $x_2$, igual que Newton"
+    correcta: 0
+
+  - id: "mint_02"
+    titulo: "Por qué Müller alcanza raíces complejas"
+    pregunta: >-
+      Los métodos cerrados (bisección, falsa posición) y la secante con
+      aritmética **real** no pueden hallar raíces complejas de un polinomio
+      con coeficientes reales. **¿Cómo lo logra Müller?**
+    opciones:
+      - "a) Porque al resolver la ecuación de la parábola la raíz puede salir compleja (la raíz cuadrada de un discriminante negativo), y el método la sigue iterando en el plano complejo"
+      - "b) Porque la parábola siempre tiene raíces reales"
+      - "c) Porque aproxima las raíces complejas con números reales muy grandes"
+      - "d) Porque deriva la función y usa el criterio de la segunda derivada"
+    correcta: 0
+
+  - id: "mint_03"
+    titulo: "La elección del signo en el denominador"
+    pregunta: >-
+      En Müller, la nueva aproximación es
+      $x_3 = x_2 + \\frac{-2c}{b \\pm \\sqrt{b^2 - 4ac}}$.
+      **¿Cómo se elige el signo $\\pm$ del denominador?**
+    opciones:
+      - "a) Se toma el que haga mayor la magnitud del denominador, para quedarse con la raíz de la parábola más cercana a $x_2$ y evitar la cancelación por resta"
+      - "b) Siempre el signo positivo"
+      - "c) Siempre el signo negativo"
+      - "d) Se prueban los dos y se promedian"
+    correcta: 0
+
+  - id: "mint_04"
+    titulo: "Qué hace falta para arrancar Müller"
+    pregunta: >-
+      Para poner en marcha el método de Müller, **¿cuántos puntos iniciales y
+      qué información se necesitan?**
+    opciones:
+      - "a) Tres puntos iniciales $x_0, x_1, x_2$ (y evaluar la función en ellos)"
+      - "b) Un solo punto inicial, como en Newton"
+      - "c) Dos puntos y la derivada de la función"
+      - "d) Ninguno: Müller arranca en $x=0$ siempre"
+    correcta: 0
+
+BAIRSTOW_INTRO:
+  - id: "bint_01"
+    titulo: "Qué es el factor cuadrático de Bairstow"
+    pregunta: >-
+      El método de Bairstow no busca las raíces de una en una, sino que
+      extrae del polinomio un **factor cuadrático** $x^2 - r x - s$.
+      **¿Qué son $r$ y $s$?**
+    opciones:
+      - "a) Dos incógnitas que se ajustan con Newton de dos variables hasta que el factor divida exactamente al polinomio"
+      - "b) Las dos raíces del polinomio"
+      - "c) El valor y la derivada en un punto"
+      - "d) La tolerancia y el número de iteraciones"
+    correcta: 0
+
+  - id: "bint_02"
+    titulo: "De dónde salen las dos raíces de cada factor"
+    pregunta: >-
+      Una vez que Bairstow converge a un factor $x^2 - r x - s$, sus dos
+      raíces (reales o complejas conjugadas) se obtienen con
+      $x_{1,2} = \\frac{r \\pm \\sqrt{r^2 + 4s}}{2}$.
+      **¿Cuándo esas dos raíces son complejas?**
+    opciones:
+      - "a) Cuando $r^2 + 4s < 0$: la raíz cuadrada da un número imaginario puro"
+      - "b) Nunca: Bairstow solo encuentra raíces reales"
+      - "c) Cuando $r > 0$"
+      - "d) Cuando el polinomio es de grado impar"
+    correcta: 0
+
+  - id: "bint_03"
+    titulo: "Para qué sirven las dos divisiones sintéticas"
+    pregunta: >-
+      En cada iteración de Bairstow se hacen **dos** divisiones sintéticas:
+      la primera da los $b_k$ (y el residuo) y la segunda, sobre los $b_k$, da
+      los $c_k$. **¿Para qué sirven los $c_k$?**
+    opciones:
+      - "a) Son las derivadas parciales del residuo respecto a $r$ y $s$: con ellas se arma el sistema $2\\times2$ de la corrección $(\\Delta r, \\Delta s)$"
+      - "b) Son las raíces del polinomio"
+      - "c) Son los coeficientes del polinomio deflactado"
+      - "d) No sirven: son un paso redundante"
+    correcta: 0
+
+  - id: "bint_04"
+    titulo: "Cómo sigue Bairstow después de un factor"
+    pregunta: >-
+      Después de extraer un factor cuadrático (dos raíces), Bairstow
+      **deflacta** el polinomio. **¿Qué significa eso?**
+    opciones:
+      - "a) Baja el grado en 2 (usa el cociente de la división) y repite sobre el polinomio reducido hasta agotar el grado"
+      - "b) Borra las raíces que ya encontró y empieza de cero"
+      - "c) Multiplica el polinomio por el factor para comprobar"
+      - "d) Duplica el grado del polinomio"
+    correcta: 0
+
+POLI_CONCL:
+  - id: "pconcl_01"
+    titulo: "Müller y Bairstow frente a numpy.roots"
+    pregunta: >-
+      Programaste `muller` y `bairstow` a mano y los comparas con
+      `numpy.roots` para un polinomio de grado 5. **¿Qué esperas de la
+      comparación?**
+    opciones:
+      - "a) Las raíces coinciden (dentro de la tolerancia), pero `numpy.roots` es más rápido y ya viene depurado; lo que aporta programarlos es entender el método"
+      - "b) `numpy.roots` da raíces distintas porque usa otro algoritmo"
+      - "c) Müller y Bairstow siempre dan más decimales que `numpy.roots`"
+      - "d) `numpy.roots` solo sirve para polinomios de grado par"
+    correcta: 0
+
+  - id: "pconcl_02"
+    titulo: "Cuándo conviene un método propio"
+    pregunta: >-
+      Si en producción ya existe `numpy.roots`, **¿cuándo tiene sentido usar
+      tu propio Müller o Bairstow?**
+    opciones:
+      - "a) Cuando necesitas control fino del arranque, del criterio de paro o de las iteraciones (por ejemplo en un microcontrolador sin numpy)"
+      - "b) Nunca: `numpy.roots` siempre es mejor en todo"
+      - "c) Solo para polinomios de grado 1 y 2"
+      - "d) Solo cuando no hay raíces complejas"
+    correcta: 0
+
+  - id: "pconcl_03"
+    titulo: "Precisión de una raíz encontrada"
+    pregunta: >-
+      Tras converger, quieres verificar la precisión de una raíz $x_*$ que te
+      dio tu método. **¿Cuál es la comprobación más directa?**
+    opciones:
+      - "a) Evaluar $|f(x_*)|$: si es del orden de la tolerancia, la raíz es buena"
+      - "b) Contar cuántas iteraciones tardó"
+      - "c) Comparar $x_*$ con el punto inicial $x_0$"
+      - "d) Redondear $x_*$ a un entero"
+    correcta: 0
+
+  - id: "pconcl_04"
+    titulo: "Raíces múltiples y convergencia"
+    pregunta: >-
+      Un polinomio tiene una raíz **doble** (multiplicidad 2). **¿Qué le
+      pasa a la convergencia de los métodos iterativos (Müller/Bairstow)?**
+    opciones:
+      - "a) Convergen más lento (la raíz es un punto de tangencia, no un cruce); la deflación repetida ayuda a separarla"
+      - "b) No les afecta en absoluto"
+      - "c) Convergen en una sola iteración"
+      - "d) No pueden encontrar raíces dobles"
+    correcta: 0
