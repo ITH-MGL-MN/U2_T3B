@@ -10,7 +10,7 @@ son la capa de presentación. El motor de `profe.core` solo devuelve datos.
     mano_enunciado(metodo)        enunciado + datos de la actividad a mano
     mano_comprueba(metodo, lista) realimentación de lo que reportó el alumno
     mano_solucion(metodo)         valores de referencia de la actividad
-    hoja_manual()                 resumen para calificar las 2 rúbricas
+    hoja_manual()                 hoja de evidencia de las 2 actividades a mano
     calificar / enviar / ultimo_envio / consultar_calificacion
 
 REGLA de esta entrega: todo el TEXTO visible para el alumno vive en
@@ -84,14 +84,16 @@ def _obtener_examen(nc=None, marco=None):
 # =====================================================================
 #  TAREA Y PREGUNTAS
 # =====================================================================
-def generar_tarea(alumno_id):
+def generar_tarea(alumno_id, nombre=None):
     """Crea la tarea del alumno y avisa de su tamaño (una sola línea)."""
     global _EXAMEN
-    _EXAMEN = Tarea(alumno_id)
-    _display(_markdown('Esta tarea tiene **%d** preguntas automáticas (%g puntos) y **%d** '
-                       'actividades a mano que revisa tu profesor (%g%% de la calificación).'
+    _EXAMEN = Tarea(alumno_id, nombre=nombre)
+    _display(_markdown('Esta tarea tiene **%d** preguntas automáticas (%g puntos): '
+                       'esas son las que cuentan. Las **%d** actividades a mano se '
+                       'hacen igual, pero se entregan como evidencia (captura de la '
+                       'hoja + enlace de tu cuaderno en Colab).'
                        % (len(_EXAMEN.preguntas), _EXAMEN.maximo,
-                          len(METODOS_MANO), 100.0 * _EXAMEN.peso_mano)))
+                          len(METODOS_MANO))))
     return _EXAMEN
 
 
@@ -228,6 +230,9 @@ def _mostrar_resultados(filas):
 
 
 def _nota_ponderada(ex, porcentaje_auto):
+    if ex.peso_mano <= 0:
+        print('NOTA FINAL: %.1f / 100  (todo automático)' % porcentaje_auto)
+        return
     print('NOTA FINAL (ponderada): %.1f / 100  =  %.2f × %.1f %%  +  %.2f × manual'
           % (100.0 * ex.peso_auto * porcentaje_auto / 100.0, ex.peso_auto,
              porcentaje_auto, ex.peso_mano))
@@ -412,46 +417,112 @@ def _referencia_mano(metodo):
     return [(etq, float(fn(ej))) for etq, fn in MANO_REPORTE[metodo]]
 
 
+# --- presentación de las actividades a mano --------------------------
+#  Todo lo que muestre valores o tablas va con `display` y en LaTeX, nunca
+#  con `print`: así el alumno ve las cuentas como en el enunciado.
+
+_TEXTO_ETQ = {'x3': r'x_3', 'Δr': r'\Delta r', 'Δs': r'\Delta s'}
+
+
+def _etq_tex(etq):
+    """La etiqueta del valor, lista para meter entre `$`: `x3` -> `x_3`."""
+    return _TEXTO_ETQ.get(etq, etq)
+
+
+def _reporte_tex(metodo):
+    """Igual que `_reporte_txt` pero en LaTeX: `[x_3]`."""
+    return '[%s]' % ', '.join(_etq_tex(etq)
+                              for etq, _fn in MANO_REPORTE[metodo])
+
+
+def _largo_txt(valor):
+    """Un número con 8 cifras significativas (sin notación científica)."""
+    try:
+        return '%.8g' % float(valor)
+    except (TypeError, ValueError):
+        return str(valor)
+
+
+def _exp_tex(valor):
+    """LaTeX para un número pequeño: `1.2e-05` -> 1.2 \times 10^{-5}."""
+    mantisa, _, exponente = ('%.1e' % float(valor)).partition('e')
+    return r'%s\times 10^{%d}' % (mantisa, int(exponente))
+
+
+def _error_rel(valor, ref):
+    """Error relativo de un valor reportado frente a su referencia."""
+    return abs(float(valor) - float(ref)) / max(abs(float(ref)), 1e-12)
+
+
+def _tabla_md(encabezados, filas):
+    """Una tabla de Markdown (las matemáticas van entre `$`)."""
+    lineas = ['| ' + ' | '.join(encabezados) + ' |',
+              '|' + '|'.join([':---'] * len(encabezados)) + '|']
+    lineas += ['| ' + ' | '.join(fila) + ' |' for fila in filas]
+    return '\n'.join(lineas)
+
+
+def _tabla_mano(metodo, alumno, ref, con_referencia=False):
+    """Tabla: valor, lo reportado, el error relativo y si es correcto."""
+    encabezados = ['**valor**', '**tu resultado**']
+    if con_referencia:
+        encabezados.append('**referencia**')
+    encabezados += ['**error relativo**', '**estado**']
+
+    filas = []
+    for i, (etq, r) in enumerate(ref):
+        valor = alumno[i] if i < len(alumno) else None
+        celdas = ['$%s$' % _etq_tex(etq)]
+        if valor is None:
+            celdas.append('_(sin reportar)_')
+            if con_referencia:
+                celdas.append('$%s$' % _largo_txt(r))
+            celdas += ['—', '⚠️']
+        else:
+            err = _error_rel(valor, r)
+            celdas.append('$%s$' % _largo_txt(valor))
+            if con_referencia:
+                celdas.append('$%s$' % _largo_txt(r))
+            celdas += ['$%s$' % _exp_tex(err),
+                       '✅' if err <= TOL_MANO else '❌']
+        filas.append(celdas)
+    return _tabla_md(encabezados, filas)
+
+
 def mano_comprueba(metodo, valores):
     """Realimentación de la actividad a mano: compara todos los valores."""
     ej = (_MANO_EJ or {}).get(metodo)
     if ej is None:
-        print('Primero ejecuta mano_enunciado(%r).' % metodo)
+        _display(_markdown('Primero ejecuta `mano_enunciado(%r)`.' % metodo))
         return None
 
     try:
         vals = [float(v) for v in valores]
     except (TypeError, ValueError):
-        print('\u26a0\ufe0f Reporta una lista de números, por ejemplo %s.'
-              % _reporte_txt(metodo))
+        _display(_markdown('\u26a0\ufe0f Reporta una lista de números, por '
+                           'ejemplo `%s`.' % _reporte_txt(metodo)))
         return None
 
     _MANO[metodo] = vals
     ref = _referencia_mano(metodo)
-    print('Tus valores reportados: %s'
-          % ', '.join('%s = %.8g' % (etq, v) for (etq, _r), v in zip(ref, vals)))
 
-    todo, faltan = True, len(ref) - len(vals)
-    print('')
-    print('   %-10s %-16s %-16s %s' % ('valor', 'tu resultado', 'referencia', 'estado'))
-    print('   ' + '-' * 58)
+    _display(_markdown('**Tus valores reportados** · %s' % ej['titulo']))
+    _display(_markdown(_tabla_mano(metodo, vals, ref, con_referencia=True)))
+
+    todo = True
     for (etq, r), v in zip(ref, vals):
-        err = abs(v - r) / max(abs(r), 1e-12)
-        bien = err <= TOL_MANO
-        todo = todo and bien
-        print('   %-10s %-16.8g %-16.8g %s (error %.1e)'
-              % (etq, v, r, '\u2705' if bien else '\u274c', err))
-
+        todo = todo and _error_rel(v, r) <= TOL_MANO
     _MANO_RES[metodo] = bool(todo and len(vals) == len(ref))
-    print('')
+
     if _MANO_RES[metodo]:
-        print('\u2705 Todos los valores son correctos.')
+        _display(_markdown('✅ **Todos los valores son correctos.**'))
     else:
         if len(vals) < len(ref):
-            print('\u26a0\ufe0f Reportaste %d valores y hacen falta %d: %s.'
-                  % (len(vals), len(ref), _reporte_txt(metodo)))
-        print('   Sugerencias: arrastra TODOS los decimales de los pasos y no')
-        print('   redondees a la mitad del cálculo.')
+            _display(_markdown('\u26a0\ufe0f Reportaste **%d** valores y hacen '
+                               'falta **%d**: `%s`.'
+                               % (len(vals), len(ref), _reporte_txt(metodo))))
+        _display(_markdown('_Sugerencias: arrastra TODOS los decimales de los '
+                           'pasos y no redondees a la mitad del cálculo._'))
     return None
 
 
@@ -470,41 +541,69 @@ def mano_referencia(metodo):
     return mano_solucion(metodo)
 
 
-def hoja_manual(metodo=None):
+def _identidad_tex(ex):
+    """Nombre y número de control: es lo que identifica la hoja entregada."""
+    if ex is None:
+        return '_(sin identificar: ejecuta la celda de identificación)_'
+    piezas = []
+    if ex.nombre:
+        piezas.append('**Alumno:** %s' % ex.nombre)
+    piezas.append('**NC:** %s' % ex.nc)
+    if not ex.nombre:
+        piezas.append('_(el nombre solo lo da Google cuando corres en Colab)_')
+    return '  ·  '.join(piezas)
+
+
+def hoja_manual(metodo=None, mostrar_referencia=False):
+    """Hoja de evidencia de las 2 actividades a mano (captura + enlace).
+
+    Con `metodo` muestra solo esa actividad; sin argumentos, todas.
+
+    La columna con la **referencia NO se imprime** salvo que se pida con
+    `mostrar_referencia=True`: esta hoja la entrega el alumno, así que imprimir
+    la respuesta sería regalársela. En su lugar va el error relativo, que
+    además le sirve al profesor para ver si el cálculo está bien.
+    """
     ex = _EXAMEN
     nombre = ex.id_tarea if ex is not None else 'U2_T3B'
     metodos = (metodo,) if metodo else METODOS_MANO
 
-    print('=' * 72)
-    print('HOJA DE TRABAJO MANUAL · %s' % nombre)
-    print('=' * 72)
+    _display(_markdown('# 📋 Hoja de trabajo · %s' % nombre))
+    _display(_markdown(_identidad_tex(ex)))
+
     for met in metodos:
         ej = (_MANO_EJ or {}).get(met)
+        _display(_markdown('## %s · %s' % (NOMBRE_METODO[met], ej['titulo'])
+                           if ej else '## %s' % NOMBRE_METODO[met]))
         if ej is None:
+            _display(_markdown('_Todavía no ejecutas `mano_enunciado(%r)`, así '
+                               'que no hay nada que calificar aquí._' % met))
             continue
+
         alumno = _MANO.get(met, [])
-        print('\n%s · %s' % (NOMBRE_METODO[met], ej['titulo']))
-        if met == 'MULLER':
-            print('  función    : $f(\\omega) = %s$' % ej.get('f_latex', ''))
-            print('  %-11s: %s, %s, %s' % ('puntos', _num_txt(ej['x0']),
-                                          _num_txt(ej['x1']), _num_txt(ej['x2'])))
+        linea = _datos_texto(met, ej)
+        if linea:
+            _display(_markdown(linea))
+        _display(_markdown('**Se reporta:** $%s$' % _reporte_tex(met)))
+        _display(_markdown(_tabla_mano(met, alumno, _referencia_mano(met),
+                                       mostrar_referencia)))
+
+        if met not in _MANO_RES:
+            _display(_markdown('_Sin comprobar: falta ejecutar la celda de la '
+                               'actividad a mano._'))
+        elif _MANO_RES[met]:
+            _display(_markdown('✅ **Acertada.**'))
         else:
-            print('  polinomio  : %s' % _lista_txt(ej['a']))
-            print('  %-11s: r0 = %s, s0 = %s' % ('arranque', _num_txt(ej['r0']),
-                                                _num_txt(ej['s0'])))
-        print('  %-11s: %s' % ('referencia',
-                                ', '.join('%s = %.6g' % (etq, r)
-                                          for etq, r in _referencia_mano(met))))
-        print('  %-11s: %s' % ('alumno',
-                                (', '.join('%.6g' % v for v in alumno)
-                                 if alumno else '(sin reportar)')))
-        print('  %-11s: %s' % ('resultado', 'acertada' if _MANO_RES.get(met)
-                                else ('revisar' if met in _MANO_RES
-                                      else '(sin comprobar)')))
+            _display(_markdown('❌ **Revisar**: el error relativo tiene que '
+                               'quedar por debajo de $%s$.' % _exp_tex(TOL_MANO)))
+
     if ex is not None:
-        print('\nCalifica cada rúbrica de 0 a 10 en la hoja %s_Manual.' % nombre)
-        print('Nota final = %.2f*automático + %.2f*manual'
-              % (ex.peso_auto, ex.peso_mano))
+        _display(_markdown('---'))
+        _display(_markdown('Toma una **captura de esta hoja** y mándala junto con '
+                           'el **enlace de tu cuaderno en Colab**. La nota sale '
+                           'sola de las %d preguntas automáticas; la hoja es la '
+                           'evidencia de que hiciste las actividades a mano.'
+                           % len(ex.preguntas)))
 
 
 # =====================================================================

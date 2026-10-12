@@ -20,8 +20,11 @@ tarea:
   materia: "Métodos Numéricos"
 
 ponderacion:
-  automatico: 0.70
-  manual: 0.30
+  # Todo AUTOMÁTICO. La calificación manual se retiró (son muchos alumnos y
+  # los métodos ya son largos). Las 2 actividades a mano se siguen haciendo y
+  # se entregan como evidencia: captura de la hoja + enlace del cuaderno.
+  automatico: 1.0
+  manual: 0.0
 
 evaluacion:
   tolerancia_simple: 1e-4          # respuestas numéricas (relativa)

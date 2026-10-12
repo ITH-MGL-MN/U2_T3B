@@ -43,8 +43,12 @@ MAX_ITER_ALUMNO = 1000
 
 
 class Tarea(object):
-    def __init__(self, alumno_id, cfg=None, bancos=None):
+    def __init__(self, alumno_id, cfg=None, bancos=None, nombre=None):
         self.alumno_id = alumno_id
+        # Nombre del alumno, si el cuaderno lo pudo leer de Google: Colab lo da
+        # junto con el correo (`displayName`). Es SOLO para la hoja de trabajo;
+        # la calificación se identifica siempre por el número de control.
+        self.nombre = (nombre or '').strip()
         self.nc = extraer_nc(alumno_id)
         if not self.nc:
             raise ValueError('No pude leer el Número de Control de %r' % (alumno_id,))
@@ -70,8 +74,8 @@ class Tarea(object):
         self.url = buscar(self.cfg, 'evaluacion.apps_script_url', '')
         self.token = buscar(self.cfg, 'evaluacion.webhook_token', '')
         self.accion = buscar(self.cfg, 'evaluacion.accion', 'guardar')
-        self.peso_auto = float(buscar(self.cfg, 'ponderacion.automatico', 0.70))
-        self.peso_mano = float(buscar(self.cfg, 'ponderacion.manual', 0.30))
+        self.peso_auto = float(buscar(self.cfg, 'ponderacion.automatico', 1.0))
+        self.peso_mano = float(buscar(self.cfg, 'ponderacion.manual', 0.0))
 
         self.slots = buscar(self.cfg, 'slots', []) or []
         self.rng = obtener_rng(self.nc, self.id_tarea)
