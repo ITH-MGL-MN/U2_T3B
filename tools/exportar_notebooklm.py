@@ -26,7 +26,7 @@ Que NO exporta
 Uso
 ---
     python tools/exportar_notebooklm.py              # -> <tarea>/notebooklm/
-    python tools/exportar_notebooklm.py --unir       # + un solo txt con todo
+    python tools/exportar_notebooklm.py --unir       # + 00_TODO_<tarea>.txt
     python tools/exportar_notebooklm.py --incluir-bundle
     python tools/exportar_notebooklm.py -o C:\\tmp\\mn
 """
@@ -42,6 +42,9 @@ from pathlib import Path
 # carpeta tools/ de otra tarea del curso.
 RAIZ = Path(__file__).resolve().parent.parent
 NOMBRE_PROYECTO = RAIZ.name
+# Version unida (--unir): lleva el nombre de la carpeta de la tarea, que es el
+# mismo del cuaderno (U2_T3B -> 00_TODO_U2_T3B.txt).
+NOMBRE_UNIDO = "00_TODO_%s.txt" % NOMBRE_PROYECTO
 
 # --- Que se lee -------------------------------------------------------
 EXTENSIONES = {
@@ -256,14 +259,14 @@ def main(argv=None) -> int:
     if args.unir:
         partes = [(salida / nombre).read_text(encoding="utf-8")
                   for _rel, nombre, _kb, _codec in registros]
-        (salida / "00_TODO_la_tarea.txt").write_text(
+        (salida / NOMBRE_UNIDO).write_text(
             "\n\n".join(partes), encoding="utf-8")
 
     print("-" * 70)
     print("%d archivos, %.0f KB.  Indice: %s"
           % (len(registros), total, (salida / "00_INDICE.txt").name))
     if args.unir:
-        print("Version unica: %s" % (salida / "00_TODO_la_tarea.txt").name)
+        print("Version unica: %s" % NOMBRE_UNIDO)
     print()
     print("En NotebookLM: 'Agregar fuente > Subir archivos' y eliges la carpeta")
     print("%s completa (límite de %d fuentes por cuaderno)." % (salida.name, 50))
