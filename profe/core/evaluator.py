@@ -230,12 +230,26 @@ class Tarea(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def _num(valor):
-        """Convierte a float lo que haya (número, widget, tupla, 'a)')."""
+        """
+        Convierte a float lo que haya (número, widget, tupla, 'a)'); None si no
+        se puede leer como un número real.
+
+        El caso `complex` importa: Müller se programa con `cmath.sqrt` (lo pide
+        la teoría) y eso devuelve la raíz con TIPO complejo aunque sea real
+        (`4.1400549446402595+0j` ES 4.1400549446402595). Sin esto, `float(...)`
+        lanzaba TypeError, la raíz quedaba en None y la pregunta de programación
+        se calificaba con 0 aunque la función fuera correcta. Una raíz
+        realmente compleja no tiene float que la represente: ahí sí es None.
+        """
         if valor is None:
             return None
         try:
             if isinstance(valor, (tuple, list, np.ndarray)):
                 return float(np.ravel(np.asarray(valor, dtype=float))[0])
+            if isinstance(valor, (complex, np.complexfloating)):
+                if abs(valor.imag) > 1e-9 * max(1.0, abs(valor.real)):
+                    return None
+                return float(valor.real)
             return float(valor)
         except (TypeError, ValueError):
             return None

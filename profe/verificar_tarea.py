@@ -56,6 +56,19 @@ def muller_fijo(f, x0, x1, x2, tol=1e-6, max_iter=100):
     return 0.0, 1
 
 
+def muller_cmath(f, x0, x1, x2, tol=1e-6, max_iter=100):
+    """
+    Un alumno CORRECTO que programa Müller con `cmath.sqrt`, como pide la
+    teoría: su raíz es real pero de TIPO complejo (`4.14...+0j`). El motor
+    tiene que aceptarla igual que si fuera un float.
+
+    Es la regresión de un caso real: la pregunta de programación daba 0/25
+    porque `Tarea._num` no sabía leer un complejo con parte imaginaria nula.
+    """
+    raiz, nit = muller(f, x0, x1, x2, tol=tol, max_iter=max_iter)
+    return complex(raiz), nit
+
+
 def bairstow_fijo(a, r0, s0, tol=1e-6, max_iter=100):
     return [0.0], 1
 
@@ -86,8 +99,8 @@ def main(n_nc=N_POR_OMISION):
           % (len(slots), total,
              100.0 * float(cfg['evaluacion']['min_aprobacion'])))
     print('NC revisados: %d\n' % n_nc)
-    print('%-10s %-6s %-7s %-7s %-7s %s'
-          % ('NC', 'max', 'puntos', 'fijo', 'vector', 'respuestas'))
+    print('%-10s %-6s %-7s %-7s %-7s %-7s %s'
+          % ('NC', 'max', 'puntos', 'fijo', 'cmath', 'vector', 'respuestas'))
     print('-' * 74)
 
     for k in range(n_nc):
@@ -127,6 +140,17 @@ def main(n_nc=N_POR_OMISION):
                           'y la programación vale %g'
                           % (nc, total - puntos_fijo, peso_funcion))
 
+        # 2b) alumno correcto que devuelve la raíz con TIPO complejo ----------
+        #     (cmath.sqrt): tiene que sacar lo mismo que el perfecto.
+        marco_cmath = MarcoFalso({'muller': muller_cmath,
+                                  'bairstow': bairstow_experto})
+        filas_cmath = ex.calificar(resp, marco_cmath)
+        puntos_cmath = sum(f['puntos'] for f in filas_cmath)
+        if abs(puntos_cmath - total) > 1e-9:
+            avisos.append('NC %s: el alumno correcto con cmath.sqrt saca %g de '
+                          '%g (se está rechazando su raíz complejo-real)'
+                          % (nc, puntos_cmath, total))
+
         # 3) las preguntas de la tabla usan el ejercicio a mano ---------------
         fila_vector = None
         for i, (p, s) in enumerate(zip(ex.preguntas, ex.soluciones), 1):
@@ -164,8 +188,8 @@ def main(n_nc=N_POR_OMISION):
             else:
                 firmas[met].add(tuple(ej['a']))
 
-        print('%-10s %-6g %-7g %-7g %-7s %s'
-              % (nc, ex.maximo, puntos, puntos_fijo,
+        print('%-10s %-6g %-7g %-7g %-7g %-7s %s'
+              % (nc, ex.maximo, puntos, puntos_fijo, puntos_cmath,
                  ('%g' % fila_vector[0]) if fila_vector else '-',
                  cuerpo_resumen(ex, resp)))
 
