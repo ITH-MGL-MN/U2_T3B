@@ -221,12 +221,18 @@ def revisar_mano():
             ok_ref = cuaderno._MANO_RES.get(metodo)
             cuaderno.mano_comprueba(metodo, [v + 1.0 for v in ref])
             ok_mal = cuaderno._MANO_RES.get(metodo)
+            # Lista incompleta: ejercita el camino que avisa "faltan valores".
+            cuaderno.mano_comprueba(metodo, ref[:-1])
+            ok_corto = cuaderno._MANO_RES.get(metodo)
         if not ok_ref:
             problemas.append('%s: la referencia no se acepta' % metodo)
         if ok_mal:
             problemas.append('%s: se acepta una respuesta equivocada' % metodo)
-        print('%-10s a mano: referencia %s  malos %s'
-              % (metodo, 'OK' if ok_ref else 'FALLA', 'OK' if not ok_mal else 'NO'))
+        if ok_corto:
+            problemas.append('%s: se acepta una lista incompleta' % metodo)
+        print('%-10s a mano: referencia %s  malos %s  incompletos %s'
+              % (metodo, 'OK' if ok_ref else 'FALLA', 'OK' if not ok_mal else 'NO',
+                 'OK' if not ok_corto else 'NO'))
     return problemas
 
 

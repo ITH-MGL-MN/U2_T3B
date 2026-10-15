@@ -7,6 +7,14 @@
 #  MULLER_INTRO   -> pregunta 1 (antes de programar muller)
 #  BAIRSTOW_INTRO -> pregunta 2 (antes de programar bairstow)
 #  POLI_CONCL     -> pregunta 7 (al final, comparación con numpy.roots)
+# ---------------------------------------------------------------------
+#  CUIDADO CON LAS BARRAS DE LaTeX, que aquí se escriben de dos formas:
+#    * en un bloque `>-` (o `|`) el texto es LITERAL:  escribe \frac, \times
+#    * entre comillas DOBLES ("...") la barra es un ESCAPE de YAML: hay que
+#      escribir \\frac, \\times. Una barra sola NO es un error de sintaxis
+#      evidente: \\f se convierte en un salto de página \x0c y \\t en un
+#      tabulador, y la pregunta sale con basura en vez de con la fórmula.
+#      Si dudas, usa comillas SIMPLES ('...'), que también son literales.
 # =====================================================================
 MULLER_INTRO:
   - id: "mint_01"
@@ -39,8 +47,8 @@ MULLER_INTRO:
     titulo: "La elección del signo en el denominador"
     pregunta: >-
       En Müller, la nueva aproximación es
-      $x_3 = x_2 + \\frac{-2c}{b \\pm \\sqrt{b^2 - 4ac}}$.
-      **¿Cómo se elige el signo $\\pm$ del denominador?**
+      $x_3 = x_2 + \frac{-2c}{b \pm \sqrt{b^2 - 4ac}}$.
+      **¿Cómo se elige el signo $\pm$ del denominador?**
     opciones:
       - "a) Se toma el que haga mayor la magnitud del denominador, para quedarse con la raíz de la parábola más cercana a $x_2$ y evitar la cancelación por resta"
       - "b) Siempre el signo positivo"
@@ -58,6 +66,19 @@ MULLER_INTRO:
       - "b) Un solo punto inicial, como en Newton"
       - "c) Dos puntos y la derivada de la función"
       - "d) Ninguno: Müller arranca en $x=0$ siempre"
+    correcta: 0
+
+  - id: "mint_05"
+    titulo: "¿Hace falta que los puntos encierren la raíz?"
+    pregunta: >-
+      Para arrancar Müller solo hacen falta **tres puntos** y los valores de la
+      función en ellos. **¿Tienen que encerrar la raíz** (uno con $f < 0$ y otro
+      con $f > 0$), como en bisección y en falsa posición?
+    opciones:
+      - "a) No: basta con que sean tres puntos distintos, porque la parábola puede tener raíces complejas y no necesita cruzar el eje real"
+      - "b) Sí: sin cambio de signo la parábola nunca corta el eje y el método se detiene"
+      - "c) Sí, pero solo cuando la función es un polinomio de grado impar"
+      - "d) No: Müller no usa los puntos, arranca siempre en $x = 0$"
     correcta: 0
 
 BAIRSTOW_INTRO:
@@ -79,7 +100,7 @@ BAIRSTOW_INTRO:
     pregunta: >-
       Una vez que Bairstow converge a un factor $x^2 - r x - s$, sus dos
       raíces (reales o complejas conjugadas) se obtienen con
-      $x_{1,2} = \\frac{r \\pm \\sqrt{r^2 + 4s}}{2}$.
+      $x_{1,2} = \frac{r \pm \sqrt{r^2 + 4s}}{2}$.
       **¿Cuándo esas dos raíces son complejas?**
     opciones:
       - "a) Cuando $r^2 + 4s < 0$: la raíz cuadrada da un número imaginario puro"
@@ -95,7 +116,7 @@ BAIRSTOW_INTRO:
       la primera da los $b_k$ (y el residuo) y la segunda, sobre los $b_k$, da
       los $c_k$. **¿Para qué sirven los $c_k$?**
     opciones:
-      - "a) Son las derivadas parciales del residuo respecto a $r$ y $s$: con ellas se arma el sistema $2\\times2$ de la corrección $(\\Delta r, \\Delta s)$"
+      - "a) Son las derivadas parciales del residuo respecto a $r$ y $s$: con ellas se arma el sistema $2 \\times 2$ de la corrección $(\\Delta r, \\Delta s)$"
       - "b) Son las raíces del polinomio"
       - "c) Son los coeficientes del polinomio deflactado"
       - "d) No sirven: son un paso redundante"

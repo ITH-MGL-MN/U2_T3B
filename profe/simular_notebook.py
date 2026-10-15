@@ -36,6 +36,12 @@ import warnings
 # backend sin pantalla ANTES de que el cuaderno importe matplotlib; en el
 # cuaderno normal no afecta, porque ahí manda el `%matplotlib inline` de la 1.
 os.environ.setdefault('MPLBACKEND', 'Agg')
+# Lo mismo con plotly, que tiene su propia versión del problema: fuera de un
+# cuaderno su renderizador por omisión es `browser`, así que cada `fig.show()`
+# (la superficie y la animación de Müller) intentaba ABRIR una pestaña del
+# navegador con una figura de varios MB. Se le pide el renderizador `json`, que
+# no abre nada. En el cuaderno normal no afecta: ahí manda el kernel.
+os.environ.setdefault('PLOTLY_RENDERER', 'json')
 # Con un backend sin pantalla, `plt.show()` avisa de que no puede mostrar nada.
 # Al verificar eso es lo esperado, no un problema del cuaderno: se silencia solo
 # ese aviso, para que no ensucie el resultado de las comprobaciones.

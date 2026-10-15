@@ -42,12 +42,15 @@ from profe.ui.cuaderno import (
     hoja_manual,
     mano_comprueba,
     mano_enunciado,
+    mano_ecuacion,
     mano_referencia,
     mano_solucion,
+    practica,
     pregunta,
     raices_de,
     semilla_de,
     ultimo_envio,
+    ver_preguntas,
 )
 
 # Compatibilidad: la clase se llamaba `Examen` antes de renombrarla.
@@ -62,7 +65,9 @@ __all__ = [
     'bairstow', 'buscar', 'cargar_yaml', 'calificar', 'consultar_calificacion',
     'elegir', 'elegir_mano', 'enviar', 'extraer_nc', 'generar_examen',
     'generar_semilla', 'generar_tarea', 'hoja_manual', 'mano_comprueba',
-    'mano_enunciado', 'mano_referencia', 'mano_solucion', 'muller',
-    'obtener_configuracion', 'obtener_rng', 'pregunta', 'raices_de', 'resolver',
-    'semilla', 'semilla_de', 'ultimo_envio',
+    'mano_enunciado', 'mano_ecuacion', 'mano_referencia', 'mano_solucion',
+    'muller',
+    'obtener_configuracion', 'obtener_rng', 'practica', 'pregunta',
+    'raices_de', 'resolver',
+    'semilla', 'semilla_de', 'ultimo_envio', 'ver_preguntas',
 ]
